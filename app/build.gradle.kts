@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.devtools.kapt)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -56,4 +58,37 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // room db
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    kapt(libs.room.compiler)
+    testImplementation(libs.room.testing)
+
+
+    //Dagger - Hilt
+    implementation(libs.hilt.android)
+    kapt (libs.hilt.compiler)
+
+    // --- Retrofit ---
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+
+    // --- OkHttp Logging (Optional but recommended for debugging) ---
+    implementation(libs.okhttp.logging)
+
+    //constraint Layout for compose
+    implementation(libs.androidx.constraintlayout.compose)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    implementation(libs.mqtt.client)
+    implementation(libs.mqtt.android)
+}
+
+kapt {
+    correctErrorTypes = true
 }
