@@ -1,4 +1,4 @@
-package com.example.smartlightapp.ui.theme
+package com.example.smartlightapp.feature_smartLight.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
