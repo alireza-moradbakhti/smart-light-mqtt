@@ -1,5 +1,6 @@
 package com.example.smartlightapp.feature_smartLight.presentation.lightcontrol
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartlightapp.feature_smartLight.domain.repository.MqttRepository
@@ -30,19 +31,26 @@ class LightControlViewModel @Inject constructor(
 
     private fun connectToBroker() {
 
+        Log.d("MQTT", "Connecting to broker...")
+
         mqttRepository.connect(
             onConnected = {
+                Log.d("MQTT", "Connected successfully")
+                _uiState.update {
+                    it.copy(isConnected = true)
+                }
                 mqttRepository.subscribeToLightState { lightState ->
+                    Log.d("MQTT", "Message received: $lightState")
                     _uiState.update {
                         it.copy(
                             isOn = lightState.isOn,
                             brightness = lightState.brightness,
-                            isConnected = true
                         )
                     }
                 }
             },
             onError = { error ->
+                Log.e("MQTT", "Connection failed: ${error.message}")
                 _uiState.update {
                     it.copy(error = error.message)
                 }
