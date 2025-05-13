@@ -2,8 +2,8 @@ package com.example.smartlightapp.feature_smartLight.data.mqtt
 
 import android.util.Log
 import com.hivemq.client.mqtt.MqttClient
-import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,28 +11,35 @@ import javax.inject.Singleton
 @Singleton
 class MqttClientServiceImpl @Inject constructor() : MqttClientService {
 
-    private val client: Mqtt3AsyncClient = MqttClient.builder()
-        .useMqttVersion3()
+    private var isConnected = false
+
+    val client: Mqtt5AsyncClient = MqttClient.builder()
         .identifier(MqttConstants.CLIENT_ID)
-        .serverHost(MqttConstants.HOST)
-        .serverPort(MqttConstants.PORT) // default 1883
-        .automaticReconnectWithDefaultConfig()
+        .serverHost("broker.hivemq.com")
+        .serverPort(1883)
+        .useMqttVersion5()
         .buildAsync()
 
     override fun connect(onConnected: () -> Unit, onError: (Throwable) -> Unit) {
-        client.connect()
-            .whenComplete { _, throwable ->
+        client.connectWith()
+            .cleanStart(true)
+            .send()
+            .whenComplete { ack, throwable ->
                 if (throwable != null) {
-                    Log.e("MQTT", "Connection failed", throwable)
                     onError(throwable)
                 } else {
-                    Log.i("MQTT", "Connected")
+                    isConnected = true
                     onConnected()
                 }
             }
     }
 
     override fun publishCommand(message: String) {
+        if (!isConnected) {
+            Log.e("MQTT", "Client not connected. Cannot publish.")
+            return
+        }
+
         client.publishWith()
             .topic(MqttConstants.TOPIC_COMMAND)
             .payload(message.toByteArray(StandardCharsets.UTF_8))
@@ -40,6 +47,8 @@ class MqttClientServiceImpl @Inject constructor() : MqttClientService {
             .whenComplete { _, throwable ->
                 if (throwable != null) {
                     Log.e("MQTT", "Publish failed", throwable)
+                } else {
+                    Log.d("MQTT", "Command published: $message")
                 }
             }
     }
@@ -47,11 +56,15 @@ class MqttClientServiceImpl @Inject constructor() : MqttClientService {
     override fun subscribeToState(onMessageReceived: (String) -> Unit) {
         client.subscribeWith()
             .topicFilter(MqttConstants.TOPIC_STATE)
-            .callback { publish: Mqtt3Publish ->
-                val message = publish.payload.map {
-                    StandardCharsets.UTF_8.decode(it).toString()
-                }.orElse("")
-                onMessageReceived(message)
+            .callback { publish ->
+                val payload = publish.payload
+                    .map { buffer ->
+                        val bytes = ByteArray(buffer.remaining())
+                        buffer.get(bytes)
+                        String(bytes, Charsets.UTF_8)
+                    }
+                    .orElse("")
+                onMessageReceived(payload)
             }
             .send()
     }

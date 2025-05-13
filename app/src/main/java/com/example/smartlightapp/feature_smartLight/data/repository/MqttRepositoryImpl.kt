@@ -1,5 +1,6 @@
 package com.example.smartlightapp.feature_smartLight.data.repository
 
+import android.util.Log
 import com.example.smartlightapp.feature_smartLight.data.mqtt.MqttClientService
 import com.example.smartlightapp.feature_smartLight.domain.model.LightState
 import com.example.smartlightapp.feature_smartLight.domain.repository.MqttRepository
@@ -15,6 +16,7 @@ class MqttRepositoryImpl @Inject constructor(
 
     override suspend fun toggleLight(isOn: Boolean) {
         val message = if (isOn) "ON" else "OFF"
+        Log.d("MQTT_REPO", "Publishing toggle command: $message")
         mqttClientService.publishCommand(message)
     }
 
