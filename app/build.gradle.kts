@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -38,6 +40,16 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    packagingOptions {
+        // Exclude these files from being bundled in the APK
+        exclude("META-INF/INDEX.LIST")
+        exclude("META-INF/DEPENDENCIES")
+        exclude("META-INF/NOTICE")
+        exclude("META-INF/LICENSE")
+        exclude("META-INF/*.kotlin_module")
+        exclude("META-INF/io.netty.versions.properties") // Add this line
     }
 }
 
@@ -86,8 +98,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
-    implementation(libs.mqtt.client)
-    implementation(libs.mqtt.android)
+    //MQTT hive
+    implementation(libs.hivemq.mqtt.client)
 }
 
 kapt {

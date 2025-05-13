@@ -46,4 +46,12 @@ class MqttRepositoryImpl @Inject constructor(
             else -> LightState(false, 0)
         }
     }
+
+    override fun connect(onConnected: () -> Unit, onError: (Throwable) -> Unit) {
+        mqttClientService.connect(onConnected, onError)
+    }
+
+    override fun disconnect() {
+        mqttClientService.disconnect()
+    }
 }

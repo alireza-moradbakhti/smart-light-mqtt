@@ -29,15 +29,25 @@ class LightControlViewModel @Inject constructor(
     }
 
     private fun connectToBroker() {
-        mqttRepository.subscribeToLightState { lightState ->
-            _uiState.update {
-                it.copy(
-                    isOn = lightState.isOn,
-                    brightness = lightState.brightness,
-                    isConnected = true
-                )
+
+        mqttRepository.connect(
+            onConnected = {
+                mqttRepository.subscribeToLightState { lightState ->
+                    _uiState.update {
+                        it.copy(
+                            isOn = lightState.isOn,
+                            brightness = lightState.brightness,
+                            isConnected = true
+                        )
+                    }
+                }
+            },
+            onError = { error ->
+                _uiState.update {
+                    it.copy(error = error.message)
+                }
             }
-        }
+        )
     }
 
     fun toggleLight(isOn: Boolean) {
@@ -62,5 +72,10 @@ class LightControlViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mqttRepository.disconnect()
     }
 }

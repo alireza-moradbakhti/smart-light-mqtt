@@ -7,4 +7,6 @@ interface MqttRepository {
     suspend fun setBrightness(brightness: Int)
     suspend fun getCurrentLightState(): LightState
     fun subscribeToLightState(onStateUpdated: (LightState) -> Unit)
+    fun connect(onConnected: () -> Unit, onError: (Throwable) -> Unit)
+    fun disconnect()
 }
