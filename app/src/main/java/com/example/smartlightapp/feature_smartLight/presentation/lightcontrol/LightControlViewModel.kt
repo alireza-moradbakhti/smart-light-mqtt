@@ -1,0 +1,66 @@
+package com.example.smartlightapp.feature_smartLight.presentation.lightcontrol
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.smartlightapp.feature_smartLight.domain.repository.MqttRepository
+import com.example.smartlightapp.feature_smartLight.domain.usecase.SetBrightnessUseCase
+import com.example.smartlightapp.feature_smartLight.domain.usecase.ToggleLightUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+
+@HiltViewModel
+class LightControlViewModel @Inject constructor(
+    private val toggleLightUseCase: ToggleLightUseCase,
+    private val setBrightnessUseCase: SetBrightnessUseCase,
+    private val mqttRepository: MqttRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(LightControlUiState())
+    val uiState: StateFlow<LightControlUiState> = _uiState.asStateFlow()
+
+    init {
+        connectToBroker()
+    }
+
+    private fun connectToBroker() {
+        mqttRepository.subscribeToLightState { lightState ->
+            _uiState.update {
+                it.copy(
+                    isOn = lightState.isOn,
+                    brightness = lightState.brightness,
+                    isConnected = true
+                )
+            }
+        }
+    }
+
+    fun toggleLight(isOn: Boolean) {
+        viewModelScope.launch {
+            try {
+                toggleLightUseCase.execute(isOn)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            }
+        }
+    }
+
+    fun changeBrightness(brightness: Int) {
+        viewModelScope.launch {
+            try {
+                setBrightnessUseCase.execute(brightness)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            }
+        }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
+    }
+}

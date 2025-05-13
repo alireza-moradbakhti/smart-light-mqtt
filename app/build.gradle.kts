@@ -69,6 +69,7 @@ dependencies {
 
     //Dagger - Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
     kapt (libs.hilt.compiler)
 
     // --- Retrofit ---
