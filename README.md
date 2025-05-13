@@ -1,6 +1,6 @@
 # 💡 Smart Light Control App
 
-An Android app built with Kotlin and Jetpack Compose to simulate real-time control of a smart light bulb using MQTT. This take-home project demonstrates modern Android development with clean architecture, MVVM, Hilt, and real-time communication using the Eclipse Paho MQTT client.
+An Android app built with Kotlin and Jetpack Compose to simulate real-time control of a smart light bulb using MQTT. This take-home project demonstrates modern Android development with clean architecture, MVVM, Hilt, and real-time communication using the hive MQTT client.
 
 ## ✨ Features
 
@@ -18,7 +18,7 @@ An Android app built with Kotlin and Jetpack Compose to simulate real-time contr
 - Retrofit
 - Coroutines + StateFlow
 - Room (optional)
-- Eclipse Paho MQTT Client
+- Hive MQTT Client
 
 ## 🚀 Getting Started
 
